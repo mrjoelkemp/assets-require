@@ -1,10 +1,12 @@
 /**@license
- * RequireJS Hogan Plugin | v0.3.0 (2013/06/11)
+ * RequireJS Hogan Plugin | v0.3.0+ (2013/06/11)
  * Author: Miller Medeiros | MIT License
  */
 define(['hogan', 'text'], function (hogan, text) {
 
     var DEFAULT_EXTENSION = '.mustache';
+    var DEFAULT_PATH_PREFIX = '';
+    var DEFAULT_PATH_SEPARATOR = '/';
 
     var _buildMap = {};
     var _buildTemplateText = 'define("{{pluginName}}!{{moduleName}}", ["hogan"], function(hogan){'+
@@ -17,11 +19,9 @@ define(['hogan', 'text'], function (hogan, text) {
 
     function load(name, req, onLoad, config){
         var hgnConfig = config.hgn || {};
-        var fileName = name;
-        fileName += hgnConfig && hgnConfig.templateExtension != null? hgnConfig.templateExtension : DEFAULT_EXTENSION;
 
         // load text files with text plugin
-        text.get(req.toUrl(fileName), function(data){
+        getTemplateText(name, req, hgnConfig, function(data){
             var compilationOptions = hgnConfig.compilationOptions? mixIn({}, hgnConfig.compilationOptions) : {};
 
             if (config.isBuild) {
@@ -42,6 +42,60 @@ define(['hogan', 'text'], function (hogan, text) {
             render.template = template;
             // return just the render method so it's easier to use
             onLoad( render );
+        });
+    }
+
+    function inlinePartials(templateText, req, hgnConfig, callback) {
+        var pathPrefix = hgnConfig.pathPrefix != null ? hgnConfig.pathPrefix : DEFAULT_PATH_PREFIX;
+        var pathSeparator = hgnConfig.pathSeparator || DEFAULT_PATH_SEPARATOR;
+        var partials = getPartialPaths(templateText, pathPrefix, pathSeparator);
+        var done = 0;
+        var i = 0;
+
+        if (!partials.length) {
+            callback(templateText);
+        }
+
+        var inlinePartial = function(name) {
+            getTemplateText(name, req, hgnConfig, function(partialTemplateText) {
+                var regexp = new RegExp('{{> *' + regexEscape(name.substring(pathPrefix.length).replace('/', pathSeparator)) + ' *}}');
+                templateText = templateText.replace(regexp, partialTemplateText);
+                if (++done === partials.length) {
+                    callback(templateText);
+                }
+            });
+        };
+
+        for (; i < partials.length; i++) {
+            inlinePartial(partials[i]);
+        }
+    }
+
+    function regexEscape(str) {
+        return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+    }
+
+    function getPartialPaths(templateText, pathPrefix, pathSeparator) {
+        var tokens = hogan.scan(templateText);
+        var tokenLength = tokens.length;
+        var i = 0;
+        var partials = [];
+
+        for (; i < tokenLength; i++) {
+            if (tokens[i].tag === '>' && tokens[i].n.indexOf(pathSeparator) > -1) {
+                partials.push(pathPrefix + tokens[i].n.replace(pathSeparator, '/'));
+            }
+        }
+
+        return partials;
+    }
+
+    function getTemplateText(name, req, hgnConfig, callback) {
+        var fileName = name;
+        fileName += hgnConfig.templateExtension != null ? hgnConfig.templateExtension : DEFAULT_EXTENSION;
+
+        text.get(req.toUrl(fileName), function(data){
+            inlinePartials(data, req, hgnConfig, callback);
         });
     }
 
