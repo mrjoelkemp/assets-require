@@ -112,24 +112,23 @@ define(['./hogan', './text', 'module'], function (hogan, text, module) {
     return target;
   }
 
-  function write(pluginName, moduleName, writeModule){
-    if(moduleName in _buildMap){
-      if (! _buildTemplate) {
+  function write(pluginName, moduleName, writeModule) {
+    if (moduleName in _buildMap) {
+      if (!_buildTemplate) {
         // using templates to generate compiled templates, so meta :P
-        _buildTemplate = hogan.compile( _buildTemplateText );
+        _buildTemplate = hogan.compile(_buildTemplateText);
       }
       var fn = _buildMap[moduleName];
-      writeModule( _buildTemplate.render({
-        pluginName : pluginName,
-        moduleName : moduleName,
-        fn : fn
-      }) );
+      writeModule(_buildTemplate.render({
+        pluginName: pluginName,
+        moduleName: moduleName,
+        fn: fn
+      }));
     }
   }
 
   return {
-    load : load,
-    write : write
+    load: load,
+    write: write
   };
-
 });
