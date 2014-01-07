@@ -10,10 +10,10 @@ define(['./hogan', './text', 'module'], function (hogan, text, module) {
       pluginConfig = module.config(),
       _buildMap = {},
       _buildTemplateText = 'define("{{pluginName}}!{{moduleName}}", ["hogan"], function(hogan){'+
-    '  var tmpl = new hogan.Template({{{fn}}}, "", hogan);'+
-    // need to use apply to bind the proper scope.
-    '  function render(){ return tmpl.render.apply(tmpl, arguments); } render.template = tmpl; return render;'+
-    '});\n',
+                           '  var tmpl = new hogan.Template({{{fn}}}, "", hogan);'+
+                           // need to use apply to bind the proper scope.
+                           '  function render(){ return tmpl.render.apply(tmpl, arguments); } render.template = tmpl; return render;'+
+                           '});\n',
       _buildTemplate;
 
   function load(name, req, onLoad, config) {
@@ -78,7 +78,7 @@ define(['./hogan', './text', 'module'], function (hogan, text, module) {
         partials = [], i;
 
     for (i = 0; i < tokenLength; i++) {
-      if (tokens[i].tag === '>' && tokens[i].n.indexOf(pathSeparator) > -1) {
+      if (tokens[i].tag === '>' && ~tokens[i].n.indexOf(pathSeparator)) {
         partials.push(pathPrefix + tokens[i].n.replace(pathSeparator, '/'));
       }
     }
@@ -88,8 +88,8 @@ define(['./hogan', './text', 'module'], function (hogan, text, module) {
 
   function getTemplateText(name, req, hgnConfig, callback) {
     var fileName = name + (hgnConfig.templateExtension != null ?
-      hgnConfig.templateExtension :
-      DEFAULT_EXTENSION);
+                           hgnConfig.templateExtension :
+                           DEFAULT_EXTENSION);
 
     text.get(req.toUrl(fileName), function(data){
       inlinePartials(data, req, hgnConfig, callback);
@@ -105,7 +105,7 @@ define(['./hogan', './text', 'module'], function (hogan, text, module) {
   function mixIn(target, source) {
     var key;
     for (key in source){
-      if ( Object.prototype.hasOwnProperty.call(source, key) ) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
         target[key] = source[key];
       }
     }
