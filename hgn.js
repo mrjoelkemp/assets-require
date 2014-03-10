@@ -12,7 +12,7 @@ define(['hogan', 'text', 'module'], function(hogan, text, module) {
         '  var tmpl = new hogan.Template({{{fn}}}, "", hogan),'+
         '      extend = function(a, b) { for (var k in b) { a[k] = b[k]; } return a; },'+
         '      parts = { {{#partials}}"{{name}}": arguments[{{order}}].template,{{/partials}} "": null},'+
-        '      render = function() { tmpl.render.apply(tmpl, arguments); };'+
+        '      render = function() { return tmpl.render.apply(tmpl, arguments); };'+
         '  tmpl.ri = function(context, partials, indent) { return this.r(context, extend(parts, partials), indent); };'+
         '  render.template = tmpl;'+
         '  return render;'+
