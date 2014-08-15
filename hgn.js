@@ -2,7 +2,7 @@
  * RequireJS Hogan Plugin | v0.4.0
  * Author: Miller Medeiros | MIT License
  */
-define(['hogan', 'text', 'module'], function(hogan, text, module) {
+define(['./hogan', './text', 'module'], function(hogan, text, module) {
     var DEFAULT_EXTENSION = '.mustache',
     DEFAULT_DELIMITER = '/',
 
